@@ -10,7 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
@@ -31,10 +30,8 @@ public class HomeController {
     public String listUploadedFiles(Model model) throws IOException {
 
         model.addAttribute("files", storageService.loadAll().map(
-                path -> MvcUriComponentsBuilder.fromMethodName(HomeController.class,
-                        "serveFile", path.getFileName().toString()).build().toUri().toString())
+                path -> path.getFileName().toString())
                 .collect(Collectors.toList()));
-
         return "home";
     }
 
@@ -55,6 +52,12 @@ public class HomeController {
         redirectAttributes.addFlashAttribute("message",
                 "You successfully uploaded " + fileUpload.getOriginalFilename() + "!");
 
+        return "redirect:/home";
+    }
+
+    @GetMapping("/delete/{filename}")
+    public String deleteFile(@PathVariable String filename) {
+        storageService.deleteFile(filename);
         return "redirect:/home";
     }
 

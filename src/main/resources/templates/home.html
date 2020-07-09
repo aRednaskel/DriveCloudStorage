@@ -11,7 +11,7 @@
     <body class="p-3 mb-2 bg-light text-black">
         <div class="container">
             <div id="logoutDiv">
-                <form action="#" method="POST">
+                <form action="#" th:action="@{/logout}" method="POST">
                     <button type="submit" class="btn btn-secondary float-right">Logout</button>
                 </form>
             </div>
@@ -52,13 +52,15 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
-                                    <td>
-                                        <a target="_blank" class="btn btn-success">View</a>
-                                        <a  class="btn btn-danger">Delete</a>
-                                    </td>
-                                    <th scope="row">ExampleFile.txt</th>
-                                </tr>
+                                <div th:each="file : ${files}">
+                                    <tr>
+                                        <td>
+                                            <a target="_blank" class="btn btn-success" th:href="@{/home/files/{filename}(filename=${file})}">Download</a>
+                                            <a class="btn btn-danger" th:href="@{/home/delete/{filename}(filename=${file})}">Delete</a>
+                                        </td>
+                                        <th scope="row" th:href="${file}" th:text="${file}"></th>
+                                    </tr>
+                                </div>
                                 </tbody>
                             </table>
                         </div>
