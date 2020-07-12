@@ -1,5 +1,7 @@
-package com.projects.storage.DriveCloudStorage.services;
+package com.projects.storage.DriveCloudStorage.services.implementations;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -7,11 +9,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.stream.Stream;
 
 import com.projects.storage.DriveCloudStorage.config.StorageProperties;
 import com.projects.storage.DriveCloudStorage.errorhandlers.StorageException;
 import com.projects.storage.DriveCloudStorage.errorhandlers.StorageFileNotFoundException;
+import com.projects.storage.DriveCloudStorage.mapper.FileMapper;
+import com.projects.storage.DriveCloudStorage.model.StoredFile;
+import com.projects.storage.DriveCloudStorage.services.interfaces.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -24,14 +30,16 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileSystemStorageService implements StorageService {
 
     private final Path rootLocation;
+    private final FileMapper fileMapper;
 
     @Autowired
-    public FileSystemStorageService(StorageProperties properties) {
+    public FileSystemStorageService(StorageProperties properties, FileMapper fileMapper) {
         this.rootLocation = Paths.get(properties.getLocation());
+        this.fileMapper = fileMapper;
     }
 
     @Override
-    public void store(MultipartFile file) {
+    public void store(MultipartFile file, Integer userId) {
         String filename = StringUtils.cleanPath(file.getOriginalFilename());
         try {
             if (file.isEmpty()) {
@@ -42,37 +50,47 @@ public class FileSystemStorageService implements StorageService {
                         "Cannot store file with relative path outside current directory "
                                 + filename);
             }
-            try (InputStream inputStream = file.getInputStream()) {
-                Files.copy(inputStream, this.rootLocation.resolve(filename),
-                        StandardCopyOption.REPLACE_EXISTING);
+
+            if (!fileMapper.getUserFiles(userId).contains(filename)) {
+                StoredFile storedFile = new StoredFile(filename,
+                        file.getContentType(), String.valueOf(file.getSize()), userId,
+                        file.getBytes());
+                fileMapper.insert(storedFile);
+            } else {
+                throw new StorageException("File already exists");
             }
+
         }
         catch (IOException e) {
             throw new StorageException("Failed to store file " + filename, e);
         }
     }
 
+    public List<String> getUserFiles(Integer userId) {
+        return fileMapper.getUserFiles(userId);
+    }
+
+
     @Override
-    public Stream<Path> loadAll() {
+    public File load(String filename, Integer userId) {
+        File fileToDownload = new File(filename);
         try {
-            return Files.walk(this.rootLocation, 1)
-                    .filter(path -> !path.equals(this.rootLocation))
-                    .map(this.rootLocation::relativize);
+            FileOutputStream fos = new FileOutputStream(fileToDownload);
+            fos.write(fileMapper.getFile(filename, userId));
+            fos.flush();
+            fos.close();
         } catch (IOException e) {
-            throw new StorageException("Failed to read stored files", e);
+            throw new StorageFileNotFoundException("I/O error has occured: " + filename, e);
         }
+
+        return fileToDownload;
     }
 
     @Override
-    public Path load(String filename) {
-        return rootLocation.resolve(filename);
-    }
-
-    @Override
-    public Resource loadAsResource(String filename) {
+    public Resource loadAsResource(String filename, Integer userId) {
         try {
-            Path file = load(filename);
-            Resource resource = new UrlResource(file.toUri());
+            File file = load(filename, userId);
+            Resource resource = new UrlResource(file.toURI());
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             } else {
@@ -90,19 +108,8 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public void deleteFile(String filename) {
-        try {
-            Path file = load(filename);
-            Resource resource = new UrlResource(file.toUri());
-            if (resource.exists() || resource.isReadable()) {
-                FileSystemUtils.deleteRecursively(file.toFile());
-            } else {
-                throw new StorageFileNotFoundException(
-                        "Could not read file: " + filename);
-            }
-        } catch (MalformedURLException e) {
-            throw new StorageFileNotFoundException("Could not read file: " + filename, e);
-        }
+    public void deleteFile(String filename, Integer userId) {
+        fileMapper.delete(filename);
     }
 
     @Override

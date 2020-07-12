@@ -1,7 +1,7 @@
 package com.projects.storage.DriveCloudStorage;
 
 import com.projects.storage.DriveCloudStorage.config.StorageProperties;
-import com.projects.storage.DriveCloudStorage.services.StorageService;
+import com.projects.storage.DriveCloudStorage.services.interfaces.StorageService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

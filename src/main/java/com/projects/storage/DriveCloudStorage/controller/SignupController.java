@@ -2,7 +2,7 @@ package com.projects.storage.DriveCloudStorage.controller;
 
 
 import com.projects.storage.DriveCloudStorage.model.User;
-import com.projects.storage.DriveCloudStorage.services.UserService;
+import com.projects.storage.DriveCloudStorage.services.interfaces.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +34,7 @@ public class SignupController {
         }
 
         if (signupError == null) {
-            int rowsAdded = userService.createUser(user);
+            int rowsAdded = userService.create(user);
             if (rowsAdded < 0) {
                 signupError = "There was an error signing you up. Please try again.";
             }
