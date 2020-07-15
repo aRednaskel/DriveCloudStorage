@@ -21,14 +21,12 @@ class LoginAndSignUpTest {
 	public int port;
 
 	public static WebDriver driver;
-
 	public String baseURL;
 
 	@BeforeAll
 	public static void beforeAll() {
 		WebDriverManager.chromedriver().setup();
 		driver = new ChromeDriver();
-
 	}
 
 	@AfterAll
@@ -43,10 +41,15 @@ class LoginAndSignUpTest {
 	}
 
 	@Test
-	public void testUserSignupLoginAndSubmitMessage() {
+	public void testUserSignupLogin() {
 		String username = "pzastoup";
 		String password = "whatabadpassword";
 
+		driver.get(baseURL + "/home");
+		assertEquals((baseURL + "/login"), driver.getCurrentUrl());
+
+		driver.get(baseURL + "/thisisveryprivatewebsitethatonlyuserscanacces");
+		assertEquals((baseURL + "/login"), driver.getCurrentUrl());
 
 		driver.get(baseURL + "/signup");
 
@@ -58,8 +61,9 @@ class LoginAndSignUpTest {
 		LoginPage loginPage = new LoginPage(driver);
 		loginPage.login(username, password);
 
+		assertEquals((baseURL + "/home"), driver.getCurrentUrl());
 
-		assertEquals(true, true);
 	}
+
 
 }

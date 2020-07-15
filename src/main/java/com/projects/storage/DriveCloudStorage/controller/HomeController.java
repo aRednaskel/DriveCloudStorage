@@ -101,7 +101,7 @@ public class HomeController {
     @PostMapping("/credential")
     public String createOrUpdateCredentials(Authentication authentication, @ModelAttribute Credential credential, RedirectAttributes redirectAttributes) {
         if (credential.getCredentialId() != null
-                && credentialService.get(credential.getCredentialId()).getUserId()
+                && credentialService.getUserId(credential.getCredentialId())
                 .equals(userService.getUserId(authentication.getName()))) {
             credentialService.update(credential);
             redirectAttributes.addFlashAttribute("message",

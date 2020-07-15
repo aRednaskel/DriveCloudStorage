@@ -1,18 +1,5 @@
 package com.projects.storage.DriveCloudStorage.services.implementations;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
-import java.util.stream.Stream;
-
-import com.projects.storage.DriveCloudStorage.config.StorageProperties;
 import com.projects.storage.DriveCloudStorage.errorhandlers.StorageException;
 import com.projects.storage.DriveCloudStorage.errorhandlers.StorageFileNotFoundException;
 import com.projects.storage.DriveCloudStorage.mapper.FileMapper;
@@ -22,19 +9,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.List;
 
 @Service
 public class FileSystemStorageService implements StorageService {
 
-    private final Path rootLocation;
     private final FileMapper fileMapper;
 
     @Autowired
-    public FileSystemStorageService(StorageProperties properties, FileMapper fileMapper) {
-        this.rootLocation = Paths.get(properties.getLocation());
+    public FileSystemStorageService(FileMapper fileMapper) {
         this.fileMapper = fileMapper;
     }
 
@@ -103,21 +93,9 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public void deleteAll() {
-        FileSystemUtils.deleteRecursively(rootLocation.toFile());
-    }
-
-    @Override
     public void deleteFile(String filename, Integer userId) {
         fileMapper.delete(filename);
     }
 
-    @Override
-    public void init() {
-        try {
-            Files.createDirectories(rootLocation);
-        } catch (IOException e) {
-            throw new StorageException("Could not initialize storage", e);
-        }
-    }
+
 }

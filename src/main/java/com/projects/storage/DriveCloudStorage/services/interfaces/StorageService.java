@@ -8,8 +8,6 @@ import java.util.List;
 
 public interface StorageService {
 
-    void init();
-
     void store(MultipartFile file, Integer userId);
 
     File load(String filename,  Integer userId);
@@ -17,8 +15,6 @@ public interface StorageService {
     Resource loadAsResource(String filename, Integer userId);
 
     List<String> getUserFiles(Integer userId);
-
-    void deleteAll();
 
     void deleteFile(String filename, Integer userId);
 

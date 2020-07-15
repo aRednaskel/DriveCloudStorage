@@ -3,32 +3,36 @@ package com.projects.storage.DriveCloudStorage.services.implementations;
 import com.projects.storage.DriveCloudStorage.mapper.CredentialMapper;
 import com.projects.storage.DriveCloudStorage.model.Credential;
 import com.projects.storage.DriveCloudStorage.services.interfaces.CredentialService;
+import com.projects.storage.DriveCloudStorage.services.security.EncryptionService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class CredentialServiceImpl implements CredentialService {
 
     private final CredentialMapper credentialMapper;
+    private final EncryptionService encryptionService;
+    private final String encryptionkey;
 
-    public CredentialServiceImpl(CredentialMapper credentialMapper) {
+    public CredentialServiceImpl(CredentialMapper credentialMapper, EncryptionService encryptionService) {
         this.credentialMapper = credentialMapper;
+        this.encryptionService = encryptionService;
+        this.encryptionkey = UUID.randomUUID().toString().substring(1,17);
     }
     
     @Override
     public int create(Credential credential) {
+        credential.setEncryptionkey(encryptionkey);
+        credential.setPassword(encryptionService.encryptValue(credential.getPassword(), encryptionkey));
         return credentialMapper.insert(credential);
     }
 
     @Override
     public int update(Credential credential) {
+        credential.setPassword(encryptionService.encryptValue(credential.getPassword(), credential.getEncryptionkey()));
         return credentialMapper.update(credential);
-    }
-
-    @Override
-    public Credential get(Integer credentialId) {
-        return credentialMapper.getCredential(credentialId);
     }
 
     @Override

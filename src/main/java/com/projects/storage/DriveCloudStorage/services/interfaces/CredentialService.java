@@ -10,8 +10,6 @@ public interface CredentialService {
 
     int update(Credential credential);
 
-    Credential get(Integer credentialId);
-
     List<Credential> getUserCredentials(Integer userId);
 
     Integer getUserId(Integer credentialId);
