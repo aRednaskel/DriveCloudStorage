@@ -1,7 +1,6 @@
 package com.projects.storage.DriveCloudStorage.services.implementations;
 
 import com.projects.storage.DriveCloudStorage.errorhandlers.StorageException;
-import com.projects.storage.DriveCloudStorage.errorhandlers.StorageFileNotFoundException;
 import com.projects.storage.DriveCloudStorage.mapper.FileMapper;
 import com.projects.storage.DriveCloudStorage.model.StoredFile;
 import com.projects.storage.DriveCloudStorage.services.interfaces.StorageService;
@@ -70,7 +69,7 @@ public class FileSystemStorageService implements StorageService {
             fos.flush();
             fos.close();
         } catch (IOException e) {
-            throw new StorageFileNotFoundException("I/O error has occured: " + filename, e);
+            throw new StorageException("I/O error has occured: " + filename, e);
         }
 
         return fileToDownload;
@@ -84,11 +83,11 @@ public class FileSystemStorageService implements StorageService {
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             } else {
-                throw new StorageFileNotFoundException(
+                throw new StorageException(
                         "Could not read file: " + filename);
             }
         } catch (MalformedURLException e) {
-            throw new StorageFileNotFoundException("Could not read file: " + filename, e);
+            throw new StorageException("Could not read file: " + filename, e);
         }
     }
 

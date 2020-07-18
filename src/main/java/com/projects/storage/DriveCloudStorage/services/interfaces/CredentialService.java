@@ -14,5 +14,7 @@ public interface CredentialService {
 
     Integer getUserId(Integer credentialId);
 
+    Credential getDecryptedCredential(Integer credentialId);
+
     void delete(Integer credentialId);
 }

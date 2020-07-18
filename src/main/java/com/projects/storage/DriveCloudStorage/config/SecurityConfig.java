@@ -1,7 +1,12 @@
 package com.projects.storage.DriveCloudStorage.config;
 
+import com.projects.storage.DriveCloudStorage.model.User;
+import com.projects.storage.DriveCloudStorage.services.interfaces.UserService;
 import com.projects.storage.DriveCloudStorage.services.security.AuthenticationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,6 +17,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private AuthenticationService authenticationService;
+
+    @Autowired
+    UserService userService;
 
     public SecurityConfig(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
@@ -37,4 +45,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.formLogin()
                 .defaultSuccessUrl("/home", true);
     }
+
+//    @EventListener(ApplicationReadyEvent.class)
+//    public void userExamples() {
+//        User user1 = new User(0, "John", "John", "John", "John", "John");
+//        userService.create(user1);
+//
+//    }
 }

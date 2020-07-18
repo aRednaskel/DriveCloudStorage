@@ -46,6 +46,15 @@ public class CredentialServiceImpl implements CredentialService {
     }
 
     @Override
+    public Credential getDecryptedCredential(Integer credentialId) {
+        Credential decryptedCredential = credentialMapper.getCredential(credentialId);
+//        decryptedCredential.setEncryptionkey(encryptionService.encryptValue(decryptedCredential.getEncryptionkey(), decryptedCredential.getEncryptionkey()));
+        decryptedCredential.setPassword(encryptionService
+                .decryptValue(decryptedCredential.getPassword(),decryptedCredential.getEncryptionkey()));
+        return decryptedCredential;
+    }
+
+    @Override
     public void delete(Integer credentialId) {
         credentialMapper.delete(credentialId);
     }

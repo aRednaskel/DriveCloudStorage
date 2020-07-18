@@ -1,7 +1,6 @@
 package com.projects.storage.DriveCloudStorage.controller;
 
 import com.projects.storage.DriveCloudStorage.errorhandlers.StorageException;
-import com.projects.storage.DriveCloudStorage.errorhandlers.StorageFileNotFoundException;
 import com.projects.storage.DriveCloudStorage.model.Credential;
 import com.projects.storage.DriveCloudStorage.model.Note;
 import com.projects.storage.DriveCloudStorage.services.interfaces.CredentialService;
@@ -16,14 +15,20 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 @Controller
 @RequestMapping("/home")
-public class HomeController {
+public class HomeController implements HandlerExceptionResolver {
 
     private final StorageService storageService;
     private final NoteService noteService;
@@ -64,7 +69,7 @@ public class HomeController {
 
     @PostMapping("/uploadFile")
     public String handleFileUpload(Authentication authentication, @RequestParam("fileUpload") MultipartFile fileUpload,
-                                   RedirectAttributes redirectAttributes) {
+                                   RedirectAttributes redirectAttributes){
         if (fileUpload != null) {
             storageService.store(fileUpload, userService.getUserId(authentication.getName()));
             redirectAttributes.addFlashAttribute("message",
@@ -100,20 +105,32 @@ public class HomeController {
 
     @PostMapping("/credential")
     public String createOrUpdateCredentials(Authentication authentication, @ModelAttribute Credential credential, RedirectAttributes redirectAttributes) {
-        if (credential.getCredentialId() != null
-                && credentialService.getUserId(credential.getCredentialId())
-                .equals(userService.getUserId(authentication.getName()))) {
-            credentialService.update(credential);
-            redirectAttributes.addFlashAttribute("message",
-                    "You successfully edited your credential!");
-        } else {
-            credential.setUserId(userService.getUserId(authentication.getName()));
-            credentialService.create(credential);
-            redirectAttributes.addFlashAttribute("message",
+        credential.setUserId(userService.getUserId(authentication.getName()));
+        credentialService.create(credential);
+        redirectAttributes.addFlashAttribute("message",
                     "You successfully added new credential!");
-        }
-
         return "redirect:/home";
+    }
+
+    @PostMapping("/update")
+    public String updateCredential(@ModelAttribute("updateCredential") Credential updateCredential, RedirectAttributes redirectAttributes) {
+        credentialService.update(updateCredential);
+        redirectAttributes.addFlashAttribute("message",
+                    "You successfully edited your credential!");
+        return "redirect:/home";
+    }
+
+    @GetMapping("/showForm")
+    public String showFormForEdit(Authentication authentication, @RequestParam("credentialId") Integer credentialId, Model model, RedirectAttributes redirectAttributes) {
+        if (credentialService.getUserId(credentialId)
+                .equals(userService.getUserId(authentication.getName()))) {
+            Credential credential = credentialService.getDecryptedCredential(credentialId);
+            model.addAttribute("updateCredential", credential);
+            return "home/editCredential";
+        } else {
+            redirectAttributes.addFlashAttribute("You are not authorized to edit this credential");
+            return "redirect:/home";
+        }
     }
 
     @GetMapping("/deleteNote")
@@ -144,14 +161,16 @@ public class HomeController {
         return "redirect:/home";
     }
 
-    @ExceptionHandler(StorageFileNotFoundException.class)
-    public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
-        return ResponseEntity.notFound().build();
+    @Override
+    public ModelAndView resolveException(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception exc) {
+        ModelAndView modelAndView = new ModelAndView("home");
+        if (exc instanceof MaxUploadSizeExceededException || exc instanceof StorageException) {
+            modelAndView.getModel().put("message", "File size exceeds limit!");
+        } else {
+            modelAndView.getModel().put("message", exc.getCause() + " " + exc.getMessage());
+            System.out.println(Arrays.toString(exc.getStackTrace( )));
+            System.out.println(exc.getLocalizedMessage() );
+        }
+        return modelAndView;
     }
-
-    @ExceptionHandler(StorageException.class)
-    public ResponseEntity<?> handleStorageException(StorageException exc) {
-        return ResponseEntity.status(400).body(exc.getMessage());
-    }
-
 }

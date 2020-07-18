@@ -144,8 +144,8 @@
                                 <div th:each="credential : ${credentials}">
                                 <tr>
                                     <td>
-                                        <button type="button" class="btn btn-success"
-                                                th:attr="onclick=|showCredentialModal('${credential.credentialId}', '${credential.url}', '${credential.username}', '${credential.password}')|" >Edit</button>
+                                        <a class="btn btn-success"
+                                                th:href="@{/home/showForm(credentialId=${credential.credentialId})}" >Edit</a>
                                         <a class="btn btn-danger" th:href="@{/home/deleteCredential(credentialId=${credential.credentialId}, userId=${credential.userId})}">Delete</a>
                                     </td>
                                     <th scope="row" th:text="${credential.url}"></th>
