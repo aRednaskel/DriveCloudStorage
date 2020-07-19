@@ -114,6 +114,11 @@ public class HomePageCredentials {
     }
 
     public void logout() {
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace( );
+        }
         wait.until(ExpectedConditions.elementToBeClickable(logout));
         this.logout.click();
     }

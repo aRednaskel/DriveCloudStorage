@@ -7,14 +7,14 @@ public class StoredFile {
     private String contentType;
     private String fileSize;
     private Integer userId;
-    private byte[] file;
+    private byte[] filedata;
 
-    public StoredFile( String fileName, String contentType, String fileSize, Integer userId, byte[] file) {
+    public StoredFile( String fileName, String contentType, String fileSize, Integer userId, byte[] filedata) {
         this.fileName = fileName;
         this.contentType = contentType;
         this.fileSize = fileSize;
         this.userId = userId;
-        this.file = file;
+        this.filedata = filedata;
     }
 
     public Integer getFileid() {
@@ -57,11 +57,11 @@ public class StoredFile {
         this.userId = userId;
     }
 
-    public byte[] getFile() {
-        return file;
+    public byte[] getFiledata() {
+        return filedata;
     }
 
-    public void setFile(byte[] file) {
-        this.file = file;
+    public void setFiledata(byte[] filedata) {
+        this.filedata = filedata;
     }
 }

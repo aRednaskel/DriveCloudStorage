@@ -29,7 +29,6 @@ import java.util.Arrays;
 @Controller
 @RequestMapping("/home")
 public class HomeController implements HandlerExceptionResolver {
-
     private final StorageService storageService;
     private final NoteService noteService;
     private final UserService userService;
@@ -134,8 +133,8 @@ public class HomeController implements HandlerExceptionResolver {
     }
 
     @GetMapping("/deleteNote")
-    public String deleteNote(@RequestParam Integer noteId, Authentication authentication, RedirectAttributes redirectAttributes) {
-        if (noteService.getUserId(noteId).equals(userService.getUserId(authentication.getName()))) {
+    public String deleteNote(@RequestParam("noteId") Integer noteId, @RequestParam("userId") Integer userId, Authentication authentication, RedirectAttributes redirectAttributes) {
+        if (userId.equals(userService.getUserId(authentication.getName()))) {
             noteService.delete(noteId);
             redirectAttributes.addFlashAttribute("message",
                     "The note was successfully deleted!");
@@ -149,8 +148,8 @@ public class HomeController implements HandlerExceptionResolver {
 
 
     @GetMapping("/deleteCredential")
-    public String deleteCredential(@RequestParam Integer credentialId, Authentication authentication, RedirectAttributes redirectAttributes) {
-        if (credentialService.getUserId(credentialId).equals(userService.getUserId(authentication.getName()))) {
+    public String deleteCredential(@RequestParam Integer credentialId, @RequestParam Integer userId, Authentication authentication, RedirectAttributes redirectAttributes) {
+        if (userId.equals(userService.getUserId(authentication.getName()))) {
             credentialService.delete(credentialId);
             redirectAttributes.addFlashAttribute("message",
                     "The credential was successfully deleted!");
@@ -163,9 +162,11 @@ public class HomeController implements HandlerExceptionResolver {
 
     @Override
     public ModelAndView resolveException(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception exc) {
-        ModelAndView modelAndView = new ModelAndView("home");
-        if (exc instanceof MaxUploadSizeExceededException || exc instanceof StorageException) {
+        ModelAndView modelAndView = new ModelAndView("error");
+        if (exc instanceof MaxUploadSizeExceededException) {
             modelAndView.getModel().put("message", "File size exceeds limit!");
+        } else if (exc instanceof StorageException){
+            modelAndView.getModel().put("message", exc.getMessage());
         } else {
             modelAndView.getModel().put("message", exc.getCause() + " " + exc.getMessage());
             System.out.println(Arrays.toString(exc.getStackTrace( )));
@@ -173,4 +174,6 @@ public class HomeController implements HandlerExceptionResolver {
         }
         return modelAndView;
     }
+
+
 }

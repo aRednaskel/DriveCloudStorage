@@ -10,6 +10,8 @@ public interface CredentialService {
 
     int update(Credential credential);
 
+    boolean isUsernameAvailable(String credentialname, Integer userId);
+
     List<Credential> getUserCredentials(Integer userId);
 
     Integer getUserId(Integer credentialId);

@@ -46,10 +46,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .defaultSuccessUrl("/home", true);
     }
 
-//    @EventListener(ApplicationReadyEvent.class)
-//    public void userExamples() {
-//        User user1 = new User(0, "John", "John", "John", "John", "John");
-//        userService.create(user1);
-//
-//    }
+    @EventListener(ApplicationReadyEvent.class)
+    public void userExamples() {
+        User user1 = new User(1, "John", "John", "John" , "John", "John");
+        userService.create(user1);
+
+    }
 }

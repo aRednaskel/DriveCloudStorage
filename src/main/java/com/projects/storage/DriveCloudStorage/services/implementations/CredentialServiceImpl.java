@@ -1,5 +1,6 @@
 package com.projects.storage.DriveCloudStorage.services.implementations;
 
+import com.projects.storage.DriveCloudStorage.errorhandlers.StorageException;
 import com.projects.storage.DriveCloudStorage.mapper.CredentialMapper;
 import com.projects.storage.DriveCloudStorage.model.Credential;
 import com.projects.storage.DriveCloudStorage.services.interfaces.CredentialService;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class CredentialServiceImpl implements CredentialService {
@@ -21,11 +23,23 @@ public class CredentialServiceImpl implements CredentialService {
         this.encryptionService = encryptionService;
         this.encryptionkey = UUID.randomUUID().toString().substring(1,17);
     }
+
+    @Override
+    public boolean isUsernameAvailable(String credentialname, Integer userId) {
+        List<String> usernames = credentialMapper.getUserCredentials(userId)
+                .stream()
+                .map(Credential::getUsername).collect(Collectors.toList());
+        return usernames.contains(credentialname);
+    }
     
     @Override
     public int create(Credential credential) {
-        credential.setEncryptionkey(encryptionkey);
-        credential.setPassword(encryptionService.encryptValue(credential.getPassword(), encryptionkey));
+        if (!isUsernameAvailable(credential.getUsername(), credential.getUserId())) {
+            credential.setEncryptionkey(encryptionkey);
+            credential.setPassword(encryptionService.encryptValue(credential.getPassword(), encryptionkey));
+        } else {
+            throw new StorageException("Credential with current username already exists");
+        }
         return credentialMapper.insert(credential);
     }
 
@@ -48,7 +62,6 @@ public class CredentialServiceImpl implements CredentialService {
     @Override
     public Credential getDecryptedCredential(Integer credentialId) {
         Credential decryptedCredential = credentialMapper.getCredential(credentialId);
-//        decryptedCredential.setEncryptionkey(encryptionService.encryptValue(decryptedCredential.getEncryptionkey(), decryptedCredential.getEncryptionkey()));
         decryptedCredential.setPassword(encryptionService
                 .decryptValue(decryptedCredential.getPassword(),decryptedCredential.getEncryptionkey()));
         return decryptedCredential;

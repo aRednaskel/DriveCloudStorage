@@ -56,7 +56,7 @@ class LoginAndSignUpTest {
 		SignupPage signupPage = new SignupPage(driver);
 		signupPage.signup("Peter", "Zastoupil", username, password);
 
-		driver.get(baseURL + "/login");
+//		driver.get(baseURL + "/login");
 
 		LoginPage loginPage = new LoginPage(driver);
 		loginPage.login(username, password);

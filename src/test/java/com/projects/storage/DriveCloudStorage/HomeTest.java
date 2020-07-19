@@ -1,11 +1,13 @@
 package com.projects.storage.DriveCloudStorage;
 
+import com.projects.storage.DriveCloudStorage.errorhandlers.StorageException;
 import com.projects.storage.DriveCloudStorage.model.User;
 import com.projects.storage.DriveCloudStorage.pages.HomePageCredentials;
 import com.projects.storage.DriveCloudStorage.pages.HomePageNotes;
 import com.projects.storage.DriveCloudStorage.pages.LoginPage;
 import com.projects.storage.DriveCloudStorage.services.interfaces.UserService;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class HomeTest{
@@ -48,7 +51,7 @@ public class HomeTest{
     public void beforeEach() {
         baseURL  = "http://localhost:" + port;
         driver.get(baseURL + "/login");
-        userService.create(new User(0, "Tom" + testUser, "Tom", "Tom", "Tom", "Tom"));
+        userService.create(new User(1, "Tom" + testUser, "Tom", "Tom", "Tom", "Tom"));
         LoginPage loginPage = new LoginPage(driver);
         loginPage.login("Tom" + testUser, "Tom");
 
@@ -99,8 +102,8 @@ public class HomeTest{
         homePageCredentials.createCredential("www.udacity.com", "User1", "User1");
 
         homePageCredentials.editNote("www.google.com", "User2", "User2");
-        assertEquals(driver.findElements(By.xpath("//*[text()='www.udacity.com']")).size(), 0);
-        assertEquals(driver.findElements(By.xpath("//*[text()='www.google.com']")).size(), 1);
+        assertEquals(0, driver.findElements(By.xpath("//*[text()='www.udacity.com']")).size());
+        assertEquals(1, driver.findElements(By.xpath("//*[text()='www.google.com']")).size());
 
         homePageCredentials.logout();
     }
@@ -111,7 +114,7 @@ public class HomeTest{
 
         homePageCredentials.createCredential("www.udacity.com", "User1", "User1");
         homePageCredentials.deleteNote();
-        assertEquals(driver.findElements(By.xpath("//*[text()='www.udacity.com']")).size(), 0);
+        assertEquals(0, driver.findElements(By.xpath("//*[text()='www.udacity.com']")).size());
 
         homePageCredentials.logout();
     }

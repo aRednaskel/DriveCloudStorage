@@ -31,13 +31,8 @@ public class FileSystemStorageService implements StorageService {
     public void store(MultipartFile file, Integer userId) {
         String filename = StringUtils.cleanPath(file.getOriginalFilename());
         try {
-            if (file.isEmpty()) {
-                throw new StorageException("Failed to store empty file " + filename);
-            }
-            if (filename.contains("..")) {
-                throw new StorageException(
-                        "Cannot store file with relative path outside current directory "
-                                + filename);
+            if (file.isEmpty() || filename.contains("..")) {
+                throw new StorageException("Failed to store file " + filename);
             }
 
             if (!fileMapper.getUserFiles(userId).contains(filename)) {
@@ -65,7 +60,8 @@ public class FileSystemStorageService implements StorageService {
         File fileToDownload = new File(filename);
         try {
             FileOutputStream fos = new FileOutputStream(fileToDownload);
-            fos.write(fileMapper.getFile(filename, userId));
+            fos.write(fileMapper.getFile(filename, userId)
+                    .getFiledata());
             fos.flush();
             fos.close();
         } catch (IOException e) {

@@ -7,8 +7,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.util.concurrent.TimeUnit;
-
 public class HomePageNotes {
 
     @FindBy(css="#nav-notes-tab")
@@ -79,17 +77,12 @@ public class HomePageNotes {
 
     public void deleteNote() {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace( );
         }
         wait.until(ExpectedConditions.elementToBeClickable(navNotesTab));
         this.navNotesTab.click();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace( );
-        }
         wait.until(ExpectedConditions.elementToBeClickable(deleteButton));
         this.deleteButton.click();
         wait.until(ExpectedConditions.elementToBeClickable(navNotesTab));
